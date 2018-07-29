@@ -48,7 +48,7 @@
   3. Create view all_articles_view using:
   ```
           CREATE VIEW all_articles_view as
-              SELECT {},count(*) as views
+              SELECT split_part(log.path,'/',3) as articles,count(*) as views
               FROM log
               WHERE path LIKE '/article/%'
               GROUP BY path
