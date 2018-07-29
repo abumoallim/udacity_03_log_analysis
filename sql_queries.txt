@@ -1,0 +1,24 @@
+
+//Top 3 viewed Article
+select split_part(log.path,'/',3),count(*) as views from log where path like '/article/%' group by path order by views desc limit 3;
+
+//Top most view by author's article
+WITH logs AS (select split_part(log.path,'/',3) as articles,count(*) as views from log where path like '/article/%' group by path order by views desc) select authors.name,articles.author,SUM(logs.views) as total_views from authors join articles on authors.id=articles.author join logs on articles.slug = logs.articles group by articles.author,authors.name order by total_views DESC;
+
+
+
+
+//Gives total request each day
+select CAST(time as Date),count(*) from log group by CAST(time as Date) order by CAST(time as Date) DESC;
+
+//Gives error each day 
+select CAST(time as Date),count(*) as errors from log where status like '4%' group by CAST(time as Date)
+
+
+//Which day error is more than 1% 
+WITH tot_req_each_day AS (select CAST(time as Date),count(*) as errors from log group by CAST(time as Date) order by CAST(time as Date) DESC),tot_errors_each_day AS (select CAST(time as Date),count(*) as errors from log where status like '4%' group by CAST(time as Date) order by CAST(time as Date) DESC) select tot_req_each_day.time,round ((tot_errors_each_day.errors*100.0/tot_req_each_day.errors)::numeric,2) as error_percentage from tot_req_each_day left join tot_errors_each_day on tot_req_each_day.time = tot_errors_each_day.time where (tot_errors_each_day.errors*100.0/tot_req_each_day.errors)::float > 1;
+
+
+
+
+
