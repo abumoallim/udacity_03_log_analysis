@@ -31,6 +31,12 @@
   ```
   3. Change directory to /vagrant and look around with ls.
   
+  4. Install tabulate python library for tabulating the data:
+  
+  ```
+    $ pip install tabulate
+  ```
+  
 #### Setting up the database and Creating Views:
 
   1. Load the data in local database using the command:
@@ -47,30 +53,21 @@
   
   3. Create view all_articles_view using:
   ```
-          CREATE VIEW all_articles_view as
-              SELECT split_part(log.path,'/',3) as articles,count(*) as views
-              FROM log
-              WHERE path LIKE '/article/%'
-              GROUP BY path
-              ORDER BY views DESC;
+           CREATE OR REPLACE VIEW all_articles_view AS
+.              ...{Your query goes here}
   ```
   
   4. Create view tot_req_each_day_view using:
   ```
-            CREATE VIEW tot_req_each_day_view as
-               SELECT CAST(time as Date),count(*) as errors
-               FROM log
-               GROUP BY CAST(time as Date)
-               ORDER BY CAST(time as Date) DESC;
+            CREATE OR REPLACE VIEW tot_req_each_day_view AS
+.              ...{Your query goes here}
+
   ```
   
   5. Create view tot_err_each_day_view using:
   ```
-            CREATE VIEW tot_req_each_day_view as
-               SELECT CAST(time as Date),count(*) as errors
-               FROM log
-               WHERE status LIKE '4%'
-               GROUP BY CAST(time as Date);
+             CREATE OR REPLACE VIEW tot_err_each_day_view AS
+.              ...{Your query goes here}
   ```
 
   
