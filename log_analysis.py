@@ -1,4 +1,4 @@
-#!/home/abubakker/anaconda3/bin/python
+#!/usr/bin/env python3
 from tabulate import tabulate
 import psycopg2
 
@@ -10,8 +10,9 @@ article_name = "split_part(log.path,'/',3) as articles"
 """View for total number of views for each article"""
 all_articles_view = """CREATE VIEW all_articles_view as
                        SELECT {},count(*) as views
-                       FROM log
-                       WHERE path LIKE '/article/%'
+                       FROM articles
+                       JOIN log
+                       ON log.path = '/article/' || articles.slug
                        GROUP BY path
                        ORDER BY views DESC""".format(article_name)
 
@@ -26,7 +27,7 @@ tot_req_each_day_view = """CREATE VIEW tot_req_each_day_view as
 tot_err_each_day_view = """CREATE VIEW tot_err_each_day_view as
                            SELECT CAST(time as Date),count(*) as errors
                            FROM log
-                           WHERE status LIKE '4%'
+                           WHERE status!='200 OK'
                            GROUP BY CAST(time as Date)"""
 
 database_connection = psycopg2.connect(database=DBNAME)
@@ -66,7 +67,8 @@ error_percentage = """round((tot_err_each_day_view.errors*100.0
                         /tot_req_each_day_view.errors)::numeric,2)"""
 database_cursor.execute(tot_req_each_day_view)
 database_cursor.execute(tot_err_each_day_view)
-most_error = """SELECT tot_req_each_day_view.time,{0}
+most_error = """EXPLAIN ANALYZE
+                SELECT tot_req_each_day_view.time,{0}
                 FROM tot_req_each_day_view
                 LEFT JOIN tot_err_each_day_view
                 ON tot_req_each_day_view.time = tot_err_each_day_view.time
