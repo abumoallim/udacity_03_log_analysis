@@ -1,3 +1,4 @@
+#!/home/abubakker/anaconda3/bin/python
 from tabulate import tabulate
 import psycopg2
 
@@ -59,8 +60,10 @@ print("\n")
 
 print ('This day more than 1% request lead to error : \n')
 headers = ["Date", "Error Percentage"]
-error_value = '(tot_err_each_day_view.errors*100.0/tot_req_each_day_view.errors)::float'
-error_percentage = 'round((tot_err_each_day_view.errors*100.0/tot_req_each_day_view.errors)::numeric,2)'
+error_value = """(tot_err_each_day_view.errors*100.0
+                    /tot_req_each_day_view.errors)::float"""
+error_percentage = """round((tot_err_each_day_view.errors*100.0
+                        /tot_req_each_day_view.errors)::numeric,2)"""
 database_cursor.execute(tot_req_each_day_view)
 database_cursor.execute(tot_err_each_day_view)
 most_error = """SELECT tot_req_each_day_view.time,{0}
