@@ -34,7 +34,7 @@ database_connection = psycopg2.connect(database=DBNAME)
 
 database_cursor = database_connection.cursor()
 
-print ('The most popular three articles of all time : \n')
+print('The most popular three articles of all time : \n')
 headers = ["Article", "Views"]
 database_cursor.execute(all_articles_view)
 most_viewed_article = """SELECT *
@@ -47,7 +47,8 @@ print("\n")
 
 print('The most popular article authors of all time : \n')
 headers = ["Author", "Views"]
-most_author_views = """SELECT authors.name,SUM(all_articles_view.views) as total_views
+most_author_views = """SELECT authors.name,SUM(all_articles_view.views)
+                       AS total_views
                        FROM authors join articles
                        ON authors.id=articles.author
                        JOIN all_articles_view
@@ -59,7 +60,7 @@ data = database_cursor.fetchall()
 print tabulate(data, headers)
 print("\n")
 
-print ('This day more than 1% request lead to error : \n')
+print('This day more than 1% request lead to error : \n')
 headers = ["Date", "Error Percentage"]
 error_value = """(tot_err_each_day_view.errors*100.0
                     /tot_req_each_day_view.errors)::float"""
@@ -67,8 +68,7 @@ error_percentage = """round((tot_err_each_day_view.errors*100.0
                         /tot_req_each_day_view.errors)::numeric,2)"""
 database_cursor.execute(tot_req_each_day_view)
 database_cursor.execute(tot_err_each_day_view)
-most_error = """EXPLAIN ANALYZE
-                SELECT tot_req_each_day_view.time,{0}
+most_error = """SELECT tot_req_each_day_view.time,{0}
                 FROM tot_req_each_day_view
                 LEFT JOIN tot_err_each_day_view
                 ON tot_req_each_day_view.time = tot_err_each_day_view.time
