@@ -4,39 +4,16 @@ import psycopg2
 
 DBNAME = "news"
 
-"""View for article name"""
-article_name = "split_part(log.path,'/',3) as articles"
-
-"""View for total number of views for each article"""
-all_articles_view = """CREATE VIEW all_articles_view as
-                       SELECT {},count(*) as views
-                       FROM articles
-                       JOIN log
-                       ON log.path = '/article/' || articles.slug
-                       GROUP BY path
-                       ORDER BY views DESC""".format(article_name)
-
-"""View for total number of request for each article"""
-tot_req_each_day_view = """CREATE VIEW tot_req_each_day_view as
-                           SELECT CAST(time as Date),count(*) as errors
-                           FROM log
-                           GROUP BY CAST(time as Date)
-                           ORDER BY CAST(time as Date) DESC"""
-
-"""View for total number of unsuccessful request for each article"""
-tot_err_each_day_view = """CREATE VIEW tot_err_each_day_view as
-                           SELECT CAST(time as Date),count(*) as errors
-                           FROM log
-                           WHERE status!='200 OK'
-                           GROUP BY CAST(time as Date)"""
-
 database_connection = psycopg2.connect(database=DBNAME)
 
 database_cursor = database_connection.cursor()
 
+"""executing views"""
+create_views = open("create_views.sql").read()
+database_cursor.execute(create_views)
+
 print('The most popular three articles of all time : \n')
 headers = ["Article", "Views"]
-database_cursor.execute(all_articles_view)
 most_viewed_article = """SELECT *
                        FROM all_articles_view
                        LIMIT 3"""
@@ -66,8 +43,6 @@ error_value = """(tot_err_each_day_view.errors*100.0
                     /tot_req_each_day_view.errors)::float"""
 error_percentage = """round((tot_err_each_day_view.errors*100.0
                         /tot_req_each_day_view.errors)::numeric,2)"""
-database_cursor.execute(tot_req_each_day_view)
-database_cursor.execute(tot_err_each_day_view)
 most_error = """SELECT tot_req_each_day_view.time,{0}
                 FROM tot_req_each_day_view
                 LEFT JOIN tot_err_each_day_view
